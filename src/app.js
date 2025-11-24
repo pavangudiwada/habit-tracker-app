@@ -3,12 +3,13 @@ const connectDB = require('./config/database')
 const app = express();
 const Habit = require("./models/habits");
 const { default: mongoose } = require("mongoose");
+const env = require('dotenv')
 app.use(express.json());
+env.config()
 
-const userId = new mongoose.Types.ObjectId()
-console.log(userId)
+const userId = new mongoose.Types.ObjectId(process.env.USER_ID)
 
-app.post("/hello", async (req, res) => {
+app.post("/habits", async (req, res) => {
 
     try {
         const { title, description, frequency } = req.body
@@ -24,13 +25,17 @@ app.post("/hello", async (req, res) => {
 
         const response = await newHabit.save()
         console.log(response)
-        res.send("Habit created successfully")
+        res.status(201).send(response)
 
     } catch (err) {
         console.log(err)
-        res.status(400).send("Error saving the user" + err.message)
+        res.status(400).send("Error saving the habit" + err.message)
     }
 
+})
+
+app.get("/habits", (req, res) => {
+    const data = Habit.findById(userId)
 })
 
 
@@ -46,7 +51,7 @@ app.post("/hello", async (req, res) => {
 //     res.send("Hello")
 // })
 
-connectDB().then(() => {
+connectDB(process.env.MONGODB_URI).then(() => {
     console.log("DB connected")
 })
 
